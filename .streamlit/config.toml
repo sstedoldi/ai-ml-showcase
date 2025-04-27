@@ -1,0 +1,7 @@
+[ui]
+# hides the entire top bar (running icon, stop button, hamburger menu)
+hideTopBar = true
+
+[client]
+# minimizes the toolbar so no run/stop buttons appear
+toolbarMode = "minimal"
