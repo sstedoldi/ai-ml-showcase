@@ -581,3 +581,16 @@ channels = {
         }
     ]
 }
+
+opinions = {
+    "ai_opportunities": (
+        "AI can optimize core processes in both public and private sectors, "
+        "uncovering insights, improving efficiency, and driving innovations "
+        "that elevate societal welfare."
+    ),
+    "ai_risks": (
+        "Unchecked AI may introduce bias, privacy breaches, and unintended harms, "
+        "but with robust regulations, transparent governance, and strong corrective "
+        "mechanisms focused on the common good, these risks can be effectively managed."
+    ),
+}

@@ -1,6 +1,6 @@
 # Local
 0-old/
-secrets/
+aws-secrets
 
 # Git
 .git

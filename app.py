@@ -214,13 +214,42 @@ with contact:
 # AI BOT WITH MY ASSISTANT
 ################################
 
-# code for chat with my bot
-# an AWS bedrock Agentic RAG asistant
-# using my CV and professional information as a knowledge base
-# and an open-source LLM for the conversation
-# with a guardial to avoid inappropriate chats
-# with limitation of 5 questions per IP address one lifetime
-# after the 5 questions, the bot will share email and linkedIn links for more information
-# and to contact me directly
-# and to ask for a meeting
-# with a calendar link for scheduling
+from modules.bedrock_bot import AgentBedrockRAGBot
+from awssecrets import aws_secrets
+
+
+
+# Instanciamos el bot:
+bot = AgentBedrockRAGBot(
+    api_key    = aws_secrets["AWS_KEY"],
+    secret_key = aws_secrets["AWS_SECRET"],
+    region     = aws_secrets["REGION"],
+    agent_id   = aws_secrets["AGENT_ID"],
+    alias_id = aws_secrets["AGENT_ALIAS_ID"],
+    kb_id = aws_secrets["KNOWLEDGE_BASE_ID"],
+    llm_id = aws_secrets["LLM_ID"]
+)
+
+# Mantenemos historial en session_state
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+st.markdown(UI["headers"]["chat"][lang])
+# st.chat_input ancla el input al pie de la app :contentReference[oaicite:2]{index=2}
+if prompt := st.chat_input(UI["bot_text"]["breaking_ice"][lang], key="chat_input"):
+    # Guardamos entrada de usuario
+    st.session_state.chat_history.append({"role": "user", "content": prompt})
+    # Llamamos al método RAG
+    with st.spinner(UI["bot_text"]["spinner"][lang]):
+        answer = bot.rag_query(prompt, top_k=5,
+                               inference_config={"maxTokens":512, "temperature":0.2},
+                               prompt_template="Use the following context to answer:\n$search_results$\nUser: $input$")
+    # Guardamos respuesta del agente
+    st.session_state.chat_history.append({"role": "assistant", "content": answer})
+
+# Renderizamos todo el historial
+for msg in st.session_state.chat_history:
+    if msg["role"] == "user":
+        st.chat_message("user").write(msg["content"])
+    else:
+        st.chat_message("assistant").write(msg["content"])
