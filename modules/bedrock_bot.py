@@ -1,130 +1,6 @@
-# import boto3
-# import json
-# import uuid
-
-# class AgentBedrockRAGBot:
-#     """
-#     Bedrock RAG Bot using Amazon Bedrock Agents Runtime.
-#     """
-#     def __init__(self, api_key=None, secret_key=None, region="us-east-2", agent_id=None, alias_id=None, kb_id=None):
-#         self.api_key      = api_key
-#         self.secret_key   = secret_key
-#         self.region       = region
-#         self.agent_id     = agent_id
-#         self.alias_id     = alias_id
-#         self.kb_id = kb_id
-#         self.client       = None
-#         self.session_id   = str(uuid.uuid4())
-#         if all([self.api_key, self.secret_key]):
-#             self._init_agent_client()
-
-#     def _init_agent_client(self):
-#         """Inicializa el cliente de Bedrock Agents Runtime."""
-#         self.client = boto3.client(
-#             "bedrock-agent-runtime",
-#             aws_access_key_id     = self.api_key,
-#             aws_secret_access_key = self.secret_key,
-#             region_name           = self.region
-#         )
-#         # Si no especificaste agent_id, podrías listar y elegir uno:
-#         # agents = self.client.list_agents()["agentSummaries"]
-#         # self.agent_id = agents[0]["agentId"]
-    
-#     def update_credentials(self, api_key: str, secret_key: str, region: str = None):
-#         """Actualiza credenciales y reinitializa el cliente."""
-#         self.api_key    = api_key
-#         self.secret_key = secret_key
-#         if region:
-#             self.region = region
-#         self._init_agent_client()
-
-#     def retrieve(self,
-#                  query: str,
-#                  knowledge_base_id: str,
-#                  top_k: int = 5,
-#                  filter_expression: dict = None) -> list:
-#         """
-#         Consulta la knowledge base en AWS Bedrock y devuelve los top_k resultados.
-        
-#         :param query: texto de la consulta del usuario
-#         :param knowledge_base_id: ID de la KB en Bedrock
-#         :param top_k: número de fragmentos a recuperar
-#         :param filter_expression: (opcional) diccionario para filtrar metadata
-#         :returns: lista de dicts {'text','score','metadata'}
-#         """
-#         if not self.client:
-#             self._init_agent_client()
-
-#         request_payload = {
-#             "knowledgeBaseId": knowledge_base_id,
-#             "retrievalConfiguration": {
-#                 "vectorSearchConfiguration": {
-#                     "numberOfResults": top_k
-#                 }
-#             },
-#             "retrievalQuery": {"text": query}
-#         }
-
-#         # Si definiste un filtro metadata, lo inyectas:
-#         if filter_expression:
-#             request_payload["retrievalConfiguration"]["vectorSearchConfiguration"]["filter"] = filter_expression
-
-#         response = self.client.retrieve(**request_payload)
-
-#         results = []
-#         for item in response.get("retrievalResults", []):
-#             content = item.get("content", {})
-#             text    = content.get("text") or ""
-#             score   = item.get("score")
-#             metadata= item.get("metadata", {})
-
-#             results.append({
-#                 "text": text,
-#                 "score": score,
-#                 "metadata": metadata
-#             })
-
-#         return results
-
-#     def generate_with_agent(self, text: str, enable_trace: bool = False, end_session: bool = False) -> str:
-#         """
-#         Invoca el agente de Bedrock.
-#         """
-#         if not self.client:
-#             self._init_agent_client()
-
-#         response = self.client.invoke_agent(
-#             agentId       = self.agent_id,
-#             agentAliasId  = self.alias_id, 
-#             sessionId     = self.session_id,
-#             enableTrace   = enable_trace,
-#             inputText     = text,
-#             endSession    = end_session
-#         )
-#         print(response)
-#         # Extraemos el texto de la respuesta:
-#         chunks = response.get("chunks", [])
-#         if not chunks:
-#             return ""
-#         # Suponemos un solo chunk con la respuesta final:
-#         output_bytes = chunks[-1].get("bytes", b"")
-#         return output_bytes.decode("utf-8")
-
-#     def rag_query(self, user_query: str, top_k: int = 5) -> str:
-#         # 1. Recupero top_k fragmentos del KB:
-#         docs = self.retrieve(
-#             query=user_query,
-#             knowledge_base_id=self.kb_id,
-#             top_k=top_k
-#         )
-#         # 2. Construyo contexto:
-#         context = "\n".join([d["text"] for d in docs])
-#         prompt  = f"Context:\n{context}\n\nUser: {user_query}\nAssistant:"
-#         # 3. Invoco al agente para generar respuesta:
-#         return self.generate_with_agent(prompt, enable_trace=True, end_session=True)
-    
+# -*- coding: utf-8 -*-
+# Bedrock RAG Bot using a single retrieve_and_generate call
 import boto3
-import uuid
 
 class AgentBedrockRAGBot:
     """
@@ -139,6 +15,8 @@ class AgentBedrockRAGBot:
         region: str = "us-east-1",
         kb_id: str = None,
         llm_id: str = None,
+        llm_arn: str = None,
+        rag_type: str = "KNOWLEDGE_BASE", # instead of "EXTERNAL_SOURCES"
     ):
         self.api_key     = api_key
         self.secret_key  = secret_key
@@ -147,20 +25,27 @@ class AgentBedrockRAGBot:
         self.region      = region
         self.kb_id       = kb_id
         self.llm_id   = llm_id
+        self.llm_arn     = llm_arn
+        self.rag_type     = rag_type
         self.client      = None
-        self.session_id  = str(uuid.uuid4())
+        # self.session_id  = str(uuid.uuid4())
         if api_key and secret_key:
             self._init_client()
 
     def _init_client(self):
-        """Getting LLM ARN to """
-        bedrock = boto3.client("bedrock", self.region)
-        models  = bedrock.list_foundation_models()["modelSummaries"]
-        self.llm_arn = next(
-            (m["modelArn"] for m in models 
-            if m["modelId"] == "meta.llama3-3-70b-instruct-v1:0"),
-            None
-        )
+        """Getting LLM ARN of a AWS managed LLM istance"""
+        bedrock = boto3.client("bedrock", 
+                               region_name=self.region,
+                               aws_access_key_id=self.api_key,
+                               aws_secret_access_key=self.secret_key)
+        
+        profiles = bedrock.list_inference_profiles(typeEquals="SYSTEM_DEFINED")["inferenceProfileSummaries"]
+        for p in profiles:
+            for m in p["models"]:
+                if m["modelArn"].endswith("meta.llama3-3-70b-instruct-v1:0"):
+                    self.llm_arn = p["inferenceProfileArn"]
+
+        print(f"Using LLM ARN: {self.llm_arn}")
 
         """Initialize the Bedrock Agents Runtime client."""
         self.client = boto3.client(
@@ -226,11 +111,13 @@ class AgentBedrockRAGBot:
         response = self.client.retrieve_and_generate(
             input={"text": query},
             retrieveAndGenerateConfiguration={
+                "type": self.rag_type,
                 "knowledgeBaseConfiguration": kb_cfg
             },
-            # reuse the same session to preserve context
-            sessionId=self.session_id
+            # commented out to avoid session reuse, context is handled by streamlit app
+            # sessionId=self.session_id
         )
+        # print(response)
 
         return response
 

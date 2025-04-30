@@ -217,8 +217,6 @@ with contact:
 from modules.bedrock_bot import AgentBedrockRAGBot
 from awssecrets import aws_secrets
 
-
-
 # Instanciamos el bot:
 bot = AgentBedrockRAGBot(
     api_key    = aws_secrets["AWS_KEY"],
@@ -227,7 +225,7 @@ bot = AgentBedrockRAGBot(
     agent_id   = aws_secrets["AGENT_ID"],
     alias_id = aws_secrets["AGENT_ALIAS_ID"],
     kb_id = aws_secrets["KNOWLEDGE_BASE_ID"],
-    llm_id = aws_secrets["LLM_ID"]
+    llm_id = aws_secrets["LLM_ID"],
 )
 
 # Mantenemos historial en session_state
