@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from math import pi
 
 # Local components and configuration imports
-from styles.basics import hide#, lg_color, cont_padding
+from styles.basics import hide, sidebar#, lg_color, cont_padding
 from modules.gral_config import page_config
 from modules.auth_config import auth_config
 from modules.gral_comp import title, render_element, render_skills, UI
@@ -21,13 +21,15 @@ st.set_page_config(**page_config)
 ### STYLES
 st.markdown(hide(".st-emotion-cache-zq5wmm.ezrtsby0"), unsafe_allow_html=True)
 st.markdown(hide(".stDecoration"), unsafe_allow_html=True)
+sidebar()
 
 ### HEADER
 img = "images/Portfolio-heading-cut-perfil.png"
 st.image(img, use_container_width=True)
 title()
 
-# Sidebar: Language Selection
+# Sidebar
+# Language Selection
 lang = st.sidebar.selectbox("Select Language", ['en', 'es'], format_func=lambda x: 'English' if x == 'en' else 'Español')
 
 ################################
@@ -217,37 +219,44 @@ with contact:
 from modules.bedrock_bot import AgentBedrockRAGBot
 from awssecrets import aws_secrets
 
-# Instanciamos el bot:
-bot = AgentBedrockRAGBot(
-    api_key    = aws_secrets["AWS_KEY"],
-    secret_key = aws_secrets["AWS_SECRET"],
-    region     = aws_secrets["REGION"],
-    agent_id   = aws_secrets["AGENT_ID"],
-    alias_id = aws_secrets["AGENT_ALIAS_ID"],
-    kb_id = aws_secrets["KNOWLEDGE_BASE_ID"],
-    llm_id = aws_secrets["LLM_ID"],
-)
+if "bot_activated" not in st.session_state:
+    st.session_state.bot_activated = False
 
-# Mantenemos historial en session_state
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+if st.sidebar.button("Activate Bot", key="activate_bot", type="primary", 
+                     use_container_width=True, help="Click to activate the bot."):
+    st.session_state.bot_activated = True
 
-st.markdown(UI["headers"]["chat"][lang])
-# st.chat_input ancla el input al pie de la app :contentReference[oaicite:2]{index=2}
-if prompt := st.chat_input(UI["bot_text"]["breaking_ice"][lang], key="chat_input"):
-    # Guardamos entrada de usuario
-    st.session_state.chat_history.append({"role": "user", "content": prompt})
-    # Llamamos al método RAG
-    with st.spinner(UI["bot_text"]["spinner"][lang]):
-        answer = bot.rag_query(prompt, top_k=5,
-                               inference_config={"maxTokens":512, "temperature":0.2},
-                               prompt_template="Use the following context to answer:\n$search_results$\nUser: $input$")
-    # Guardamos respuesta del agente
-    st.session_state.chat_history.append({"role": "assistant", "content": answer})
+if st.session_state.bot_activated:
+    bot = AgentBedrockRAGBot(
+        api_key    = aws_secrets["AWS_KEY"],
+        secret_key = aws_secrets["AWS_SECRET"],
+        region     = aws_secrets["REGION"],
+        agent_id   = aws_secrets["AGENT_ID"],
+        alias_id   = aws_secrets["AGENT_ALIAS_ID"],
+        kb_id      = aws_secrets["KNOWLEDGE_BASE_ID"],
+        llm_id     = aws_secrets["LLM_ID"],
+    )
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-# Renderizamos todo el historial
-for msg in st.session_state.chat_history:
-    if msg["role"] == "user":
-        st.chat_message("user").write(msg["content"])
-    else:
-        st.chat_message("assistant").write(msg["content"])
+
+    with st.sidebar:
+        
+        st.sidebar.markdown(UI["headers"]["chat"][lang])
+        messages = st.sidebar.container(height=300, border=False, key="chat_container")
+
+        if prompt := st.chat_input(UI["bot_text"]["breaking_ice"][lang], key="chat_input"):
+            st.session_state.chat_history.append({"role": "user", "content": prompt})
+            with st.spinner(UI["bot_text"]["spinner"][lang]):
+                answer = bot.rag_query(
+                    prompt,
+                    top_k=5,
+                    inference_config={"maxTokens":512, "temperature":0.2},
+                    prompt_template="Use the following context to answer:\n$search_results$\nUser: $input$")
+            st.session_state.chat_history.append({"role": "assistant", "content": answer})
+
+        for msg in st.session_state.chat_history:
+            if msg["role"] == "user":
+                messages.chat_message("user").write(msg["content"])
+            else:
+                messages.chat_message("assistant").write(msg["content"])

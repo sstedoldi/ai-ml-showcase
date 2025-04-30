@@ -29,8 +29,8 @@ class AgentBedrockRAGBot:
         self.rag_type     = rag_type
         self.client      = None
         # self.session_id  = str(uuid.uuid4())
-        if api_key and secret_key:
-            self._init_client()
+        # if api_key and secret_key:
+        #     self._init_client()
 
     def _init_client(self):
         """Getting LLM ARN of a AWS managed LLM istance"""

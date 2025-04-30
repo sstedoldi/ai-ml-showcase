@@ -6,6 +6,14 @@ def hide(class_id):
     }
     </style>''' % {"class_id": class_id}
 
+def sidebar():
+    return '''<style>
+    .st-emotion-cache-a6qe2i 
+    {
+        padding: 0px 1.5rem 1.5rem;;    
+    }
+    </style>'''
+
 def lg_color(class_id):
     return '''<style>
     %(class_id)s

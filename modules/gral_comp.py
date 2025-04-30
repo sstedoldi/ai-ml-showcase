@@ -21,7 +21,7 @@ UI = {
         "achievements":   {"en": "Achievements",              "es": "Logros"},
         "education":      {"en": "Education",                 "es": "Educación"},
         "certifications": {"en": "Certifications",            "es": "Certificaciones"},
-        "chat":           {"en": "Ask me about Santi Tedoldi!",   "es": "Preguntame sobre Santi Tedoldi!"}
+        "chat":           {"en": "Ask about Santi Tedoldi!",   "es": "Pregunta sobre Santi Tedoldi!"}
     },
     "in_action_text": {
         "en": (
@@ -40,8 +40,8 @@ UI = {
         "es": ("Por favor, contáctame si crees que puedo ayudarte con tus proyectos y/o negocios."),
     },
     "bot_text": {
-        "breaking_ice": {"en": "Hi, I am Santi's AI assistant and you can ask me a few questions you may have about him...",
-                         "es": "Hola, soy el asistente de inteligencia artificial de Santi y puedes hacerme algunas preguntas que tengas sobre él..."},
+        "breaking_ice": {"en": "Write a question...",
+                         "es": "Escribe una pregunta..."},
         "spinner": {"en": "Thinking...",
                     "es": "Pensando..."}                
     }

@@ -1,7 +1,6 @@
 # Local
 0-old/
-aws-secrets
-
+awssecrets.py
 # Git
 .git
 .gitignore
