@@ -217,7 +217,7 @@ with contact:
 ################################
 
 from modules.bedrock_bot import AgentBedrockRAGBot
-from awssecrets import aws_secrets
+from secrets.aws import aws_secrets
 
 if "bot_activated" not in st.session_state:
     st.session_state.bot_activated = False
