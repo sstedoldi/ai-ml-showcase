@@ -220,9 +220,9 @@ from modules.bedrock_bot import AgentBedrockRAGBot
 from aws_config import aws_agent_info, allow_request#, _get_client_ip, _allow_request, _ip_counts
 
 # AWS Access Key ID - Saul Good AI with Docker Compose
-AWS_API_KEY = open("../run/secrets/aws_api_key", "r").read() 
+AWS_API_KEY = open("../run/secrets/aws_api_key", "r").read().strip() 
 # AWS Secret Access Key - Saul Good AI with Docker Compose
-AWS_SECRET_KEY = open("../run/secrets/aws_secret_key", "r").read() 
+AWS_SECRET_KEY = open("../run/secrets/aws_secret_key", "r").read().strip() 
 
 # # AWS Access Key ID - Saul Good AI LOCAL
 # AWS_API_KEY = open("../secrets/aws_api_key.txt", "r").read() 
