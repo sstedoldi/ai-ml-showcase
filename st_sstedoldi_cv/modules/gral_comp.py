@@ -53,7 +53,7 @@ UI = {
 
 
 def title():
-    return st.title("Santi Tedoldi \n #### Data Scientist & AI Engineer")
+    return st.title("Santi Tedoldi \n #### Data Scientist & Electrical Engineer")
 
 def get_flag_emoji(country_name: str) -> str:
     """
