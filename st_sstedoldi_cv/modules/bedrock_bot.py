@@ -45,7 +45,7 @@ class AgentBedrockRAGBot:
                 if m["modelArn"].endswith("meta.llama3-3-70b-instruct-v1:0"):
                     self.llm_arn = p["inferenceProfileArn"]
 
-        print(f"Using LLM ARN: {self.llm_arn}")
+        # print(f"Using LLM ARN: {self.llm_arn}")
 
         """Initialize the Bedrock Agents Runtime client."""
         self.client = boto3.client(

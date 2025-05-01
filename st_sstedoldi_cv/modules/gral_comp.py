@@ -43,7 +43,11 @@ UI = {
         "breaking_ice": {"en": "Write a question...",
                          "es": "Escribe una pregunta..."},
         "spinner": {"en": "Thinking...",
-                    "es": "Pensando..."}                
+                    "es": "Pensando..."},
+        "limit": {"en": "The bot is getting to many questions from users. Wait some minutes or contact Santi directly.",
+                  "es": "The bot está recibiendo demasiadas preguntas de los usuarios. Espera unos minutos o contacta directamente con Santi."},
+        # "limit": {"en": "You have reached the limit of questions. For further info contact Santi directly.",
+        #           "es": "Has alcanzado el límite de preguntas. Para más info contacta a Santi directamente."},     
     }
 }
 

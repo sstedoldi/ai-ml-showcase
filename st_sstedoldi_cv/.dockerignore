@@ -1,11 +1,9 @@
 # Local
 0-old/
-awssecrets.py
 # Git
 .git
 .gitignore
 .gitattributes
-
 
 # CI
 .codeclimate.yml

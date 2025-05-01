@@ -7,7 +7,7 @@ from math import pi
 # Local components and configuration imports
 from styles.basics import hide, sidebar#, lg_color, cont_padding
 from modules.gral_config import page_config
-from modules.auth_config import auth_config
+# from modules.auth_config import auth_config
 from modules.gral_comp import title, render_element, render_skills, UI
 # from modules.youtube_comp import get_latest_videos
 import youtube
@@ -217,7 +217,17 @@ with contact:
 ################################
 
 from modules.bedrock_bot import AgentBedrockRAGBot
-from secrets.aws import aws_secrets
+from aws_config import aws_agent_info, allow_request#, _get_client_ip, _allow_request, _ip_counts
+
+# AWS Access Key ID - Saul Good AI with Docker Compose
+AWS_API_KEY = open("../run/secrets/aws_api_key", "r").read() 
+# AWS Secret Access Key - Saul Good AI with Docker Compose
+AWS_SECRET_KEY = open("../run/secrets/aws_secret_key", "r").read() 
+
+# # AWS Access Key ID - Saul Good AI LOCAL
+# AWS_API_KEY = open("../secrets/aws_api_key.txt", "r").read() 
+# # AWS Secret Access Key - Saul Good AI LOCAL
+# AWS_SECRET_KEY = open("../secrets/aws_secret_key.txt", "r").read()
 
 if "bot_activated" not in st.session_state:
     st.session_state.bot_activated = False
@@ -228,35 +238,44 @@ if st.sidebar.button("Activate Bot", key="activate_bot", type="primary",
 
 if st.session_state.bot_activated:
     bot = AgentBedrockRAGBot(
-        api_key    = aws_secrets["AWS_KEY"],
-        secret_key = aws_secrets["AWS_SECRET"],
-        region     = aws_secrets["REGION"],
-        agent_id   = aws_secrets["AGENT_ID"],
-        alias_id   = aws_secrets["AGENT_ALIAS_ID"],
-        kb_id      = aws_secrets["KNOWLEDGE_BASE_ID"],
-        llm_id     = aws_secrets["LLM_ID"],
+        api_key    = AWS_API_KEY,
+        secret_key = AWS_SECRET_KEY,
+        region     = aws_agent_info["REGION"],
+        agent_id   = aws_agent_info["AGENT_ID"],
+        alias_id   = aws_agent_info["AGENT_ALIAS_ID"],
+        kb_id      = aws_agent_info["KNOWLEDGE_BASE_ID"],
+        llm_id     = aws_agent_info["LLM_ID"],
     )
+    
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-
 
     with st.sidebar:
         
         st.sidebar.markdown(UI["headers"]["chat"][lang])
-        messages = st.sidebar.container(height=300, border=False, key="chat_container")
+        messages = st.sidebar.container(border=False, key="chat_container")
 
-        if prompt := st.chat_input(UI["bot_text"]["breaking_ice"][lang], key="chat_input"):
-            st.session_state.chat_history.append({"role": "user", "content": prompt})
-            with st.spinner(UI["bot_text"]["spinner"][lang]):
-                answer = bot.rag_query(
-                    prompt,
-                    top_k=5,
-                    inference_config={"maxTokens":512, "temperature":0.2},
-                    prompt_template="Use the following context to answer:\n$search_results$\nUser: $input$")
-            st.session_state.chat_history.append({"role": "assistant", "content": answer})
+        if allow_request(aws_agent_info["MAX_QUESTIONS_PER_HOUR"]):
+            if prompt := st.chat_input(UI["bot_text"]["breaking_ice"][lang], key="chat_input"):
+                st.session_state.chat_history.append({"role": "user", "content": prompt})
+                with st.spinner(UI["bot_text"]["spinner"][lang]):
+                    answer = bot.rag_query(
+                        prompt,
+                        top_k=5,
+                        inference_config={"maxTokens":512, "temperature":0.2},
+                        prompt_template="Use the following context to answer:\n$search_results$\nUser: $input$")
+                st.session_state.chat_history.append({"role": "assistant", "content": answer})
 
-        for msg in st.session_state.chat_history:
-            if msg["role"] == "user":
-                messages.chat_message("user").write(msg["content"])
-            else:
-                messages.chat_message("assistant").write(msg["content"])
+            for msg in st.session_state.chat_history:
+                if msg["role"] == "user":
+                    messages.chat_message("user").write(msg["content"])
+                else:
+                    messages.chat_message("assistant").write(msg["content"])
+        else:
+            for msg in st.session_state.chat_history:
+                if msg["role"] == "user":
+                    messages.chat_message("user").write(msg["content"])
+                else:
+                    messages.chat_message("assistant").write(msg["content"])
+
+            st.sidebar.warning(UI["bot_text"]["limit"][lang])
