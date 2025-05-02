@@ -43,6 +43,10 @@ UI = {
         "es": ("Por favor, contáctame si crees que puedo ayudarte con tus proyectos y/o negocios."),
     },
     "bot_text": {
+        "activate": {"en": "Activate the bot",
+                    "es": "Activar el bot"},
+        "activate_help": {"en": "Activate the bot to ask questions about Santi Tedoldi.",
+                        "es": "Activa el bot para hacer preguntas sobre Santi Tedoldi."},
         "breaking_ice": {"en": "Write a question...",
                          "es": "Escribe una pregunta..."},
         "spinner": {"en": "Thinking...",

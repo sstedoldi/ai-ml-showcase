@@ -232,8 +232,8 @@ AWS_SECRET_KEY = open("../run/secrets/aws_secret_key", "r").read().strip()
 if "bot_activated" not in st.session_state:
     st.session_state.bot_activated = False
 
-if st.sidebar.button("Activate Bot", key="activate_bot", type="primary", 
-                     use_container_width=True, help="Click to activate the bot."):
+if st.sidebar.button(UI["bot_text"]["activate"][lang], key="activate_bot", type="primary", 
+                     use_container_width=True, help=UI["bot_text"]["activate_help"][lang]):
     st.session_state.bot_activated = True
 
 if st.session_state.bot_activated:
