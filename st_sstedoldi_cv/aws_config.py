@@ -7,7 +7,7 @@ aws_agent_info = {
     "AGENT_ALIAS_ID": "PLDM3BMU5L",
     "KNOWLEDGE_BASE_ID": "BYQKNMPG1N",
     "LLM_ID": "meta.llama3-3-70b-instruct-v1:0",
-    "MAX_QUESTIONS_PER_HOUR": 10,
+    "MAX_QUESTIONS_PER_HOUR": 8,
     # "MAX_QUESTIONS_PER_IP": 5,
 }
 
