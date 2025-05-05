@@ -15,21 +15,22 @@ services:
     command: >
       streamlit run app.py
       --server.address=0.0.0.0
-      --server.port=8501
+      --server.port=80
+    # --server.port=8501
     secrets:
       - aws_api_key
       - aws_secret_key
-  apache:
-    image: httpd:2.4-alpine
-    container_name: apache_proxy
-    depends_on:
-      - st_sstedoldi
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
-      - ./apache/vhost.conf:/usr/local/apache2/conf/vhost.conf:ro
+  # apache:
+  #   image: httpd:2.4-alpine
+  #   container_name: apache_proxy
+  #   depends_on:
+  #     - st_sstedoldi
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+  #     - ./apache/vhost.conf:/usr/local/apache2/conf/vhost.conf:ro
       # - ./apache/certs:/usr/local/apache2/conf/certs:ro
   # certbot:
   #   image: certbot/certbot
