@@ -10,11 +10,27 @@ services:
     restart: unless-stopped
     env_file:
       - dev.env
-    ports:
-      - 80:8501 # host:container
+    expose:
+      - "8501"
+    command: >
+      streamlit run app.py
+      --server.address=0.0.0.0
+      --server.port=8501
     secrets:
       - aws_api_key
       - aws_secret_key
+  apache:
+    image: httpd:2.4-alpine
+    container_name: apache_proxy
+    depends_on:
+      - st_sstedoldi
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+      - ./apache/vhost.conf:/usr/local/apache2/conf/vhost.conf:ro
+      - ./apache/certs:/usr/local/apache2/conf/certs:ro
 secrets:
   aws_api_key:
     file: ./secrets/aws_api_key.txt
