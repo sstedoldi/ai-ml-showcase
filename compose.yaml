@@ -10,16 +10,37 @@ services:
     restart: unless-stopped
     env_file:
       - dev.env
-    expose:
-      - "8501"
-    command: >
-      streamlit run app.py
-      --server.address=0.0.0.0
-      --server.port=80
-    # --server.port=8501
+    ports:
+      - 80:8501 # host:container
     secrets:
       - aws_api_key
       - aws_secret_key
+secrets:
+  aws_api_key:
+    file: ./secrets/aws_api_key.txt
+  aws_secret_key:
+    file: ./secrets/aws_secret_key.txt
+
+# services:
+#   st_sstedoldi:
+#     image: sstedoldi_cv:latest
+#     build:
+#       context: st_sstedoldi_cv
+#       dockerfile: Dockerfile
+#     container_name: st_sstedoldi_cv
+#     restart: unless-stopped
+#     env_file:
+#       - dev.env
+#     expose:
+#       - "8501"
+#     command: >
+#       streamlit run app.py
+#       --server.address=0.0.0.0
+#       --server.port=80
+#     # --server.port=8501
+#     secrets:
+#       - aws_api_key
+#       - aws_secret_key
   # apache:
   #   image: httpd:2.4-alpine
   #   container_name: apache_proxy
@@ -31,7 +52,7 @@ services:
   #   volumes:
   #     - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
   #     - ./apache/vhost.conf:/usr/local/apache2/conf/vhost.conf:ro
-      # - ./apache/certs:/usr/local/apache2/conf/certs:ro
+  #     - ./apache/certs:/usr/local/apache2/conf/certs:ro
   # certbot:
   #   image: certbot/certbot
   #   container_name: certbot
@@ -43,8 +64,8 @@ services:
   #       --non-interactive --agree-tos
   #       --email santtedo@gmail.com
   #       -d cv.sstedoldi-ml-ai-app.com.ar -d www.sstedoldi-ml-ai-app.com.ar
-secrets:
-  aws_api_key:
-    file: ./secrets/aws_api_key.txt
-  aws_secret_key:
-    file: ./secrets/aws_secret_key.txt
+# secrets:
+#   aws_api_key:
+#     file: ./secrets/aws_api_key.txt
+#   aws_secret_key:
+#     file: ./secrets/aws_secret_key.txt
