@@ -30,18 +30,18 @@ services:
     volumes:
       - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
       - ./apache/vhost.conf:/usr/local/apache2/conf/vhost.conf:ro
-      - ./apache/certs:/usr/local/apache2/conf/certs:ro
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./apache/certs:/etc/letsencrypt
-      - ./apache/certbot-logs:/var/log/letsencrypt
-    entrypoint: >
-      certbot certonly --standalone
-        --non-interactive --agree-tos
-        --email santtedo@gmail.com
-        -d cv.sstedoldi-ml-ai-app.com.ar -d www.sstedoldi-ml-ai-app.com.ar
+      # - ./apache/certs:/usr/local/apache2/conf/certs:ro
+  # certbot:
+  #   image: certbot/certbot
+  #   container_name: certbot
+  #   volumes:
+  #     - ./apache/certs:/etc/letsencrypt
+  #     - ./apache/certbot-logs:/var/log/letsencrypt
+  #   entrypoint: >
+  #     certbot certonly --standalone
+  #       --non-interactive --agree-tos
+  #       --email santtedo@gmail.com
+  #       -d cv.sstedoldi-ml-ai-app.com.ar -d www.sstedoldi-ml-ai-app.com.ar
 secrets:
   aws_api_key:
     file: ./secrets/aws_api_key.txt
